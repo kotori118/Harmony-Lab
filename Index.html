@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <style>
+    :root{
+      --bg:#fff;
+      --fg:#111;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --cyan:#00c2ff;
+      --cyan2:#e8f9ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--fg);
+    }
+    .app{max-width:720px;margin:0 auto;padding:16px 16px 56px}
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{font-weight:900;letter-spacing:.08em;font-size:19px}
+    .badge{font-size:11px;border:1px solid var(--line);padding:5px 8px;border-radius:999px}
+    .card{border:1px solid var(--line);border-radius:18px;padding:14px;margin:0 0 14px;background:#fff}
+    .section-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+    input,select,button{font:inherit}
+    input,select{
+      width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff
+    }
+    button{
+      border:0;border-radius:12px;padding:11px 14px;font-weight:800;background:#111;color:#fff
+    }
+    button.secondary{background:#fff;color:#111;border:1px solid var(--line)}
+    button.cyan{background:var(--cyan);color:#00151c}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .row>*{flex:1}
+    .player-wrap{aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden}
+    #player{width:100%;height:100%}
+    .small{font-size:12px;color:var(--muted)}
+    .time{font-variant-numeric:tabular-nums;font-weight:800}
+    .controls{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:8px;margin-top:10px}
+    .range-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .part-card{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+    .part-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .pill{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--cyan2);font-size:11px;font-weight:800}
+    .tap-zone{
+      margin-top:12px;border:2px dashed var(--cyan);border-radius:16px;padding:24px 12px;text-align:center;
+      user-select:none;-webkit-user-select:none;touch-action:manipulation;background:#fbfeff
+    }
+    .tap-zone.active{background:var(--cyan2)}
+    .notes{display:flex;gap:4px;align-items:flex-end;min-height:54px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
+    .note{min-width:50px;border:1px solid var(--line);border-radius:10px;padding:7px 6px;text-align:center;background:#fff}
+    .note.active{outline:2px solid var(--cyan);background:var(--cyan2)}
+    .keyboard{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+    .key{background:#fff;color:#111;border:1px solid var(--line);padding:12px 8px}
+    .roll{position:relative;border:1px solid var(--line);border-radius:14px;height:260px;overflow:auto;background:
+      repeating-linear-gradient(to bottom,#fff 0,#fff 25px,#f6f7f8 26px);
+    }
+    .bar{position:absolute;height:22px;border-radius:7px;background:var(--cyan);color:#00151c;font-size:10px;font-weight:800;padding:4px 6px;white-space:nowrap;overflow:hidden}
+    .axis{font-size:10px;color:var(--muted);margin-top:6px}
+    .status{padding:9px 10px;border-radius:10px;background:#f7f7f7;font-size:12px;margin-top:8px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">HARMONY LAB</div>
+    <div class="badge">PROTOTYPE</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">SOURCE</div>
+    <input id="ytUrl" placeholder="YouTube URLを貼り付け">
+    <div class="row" style="margin-top:8px">
+      <button class="cyan" onclick="loadVideo()">LOAD YOUTUBE</button>
+      <button class="secondary" onclick="loadDemo()">DEMO</button>
+    </div>
+    <div class="player-wrap" style="margin-top:12px"><div id="player"></div></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <div class="small">CURRENT</div>
+      <div id="currentTime" class="time">00:00.00</div>
+    </div>
+
+    <div class="controls">
+      <button class="secondary" onclick="seekRelative(-5)">-5s</button>
+      <button onclick="togglePlay()">▶ / ⏸</button>
+      <button class="secondary" onclick="seekRelative(5)">+5s</button>
+    </div>
+
+    <div class="range-grid">
+      <button class="secondary" onclick="markStart()">START <span id="startTxt">--</span></button>
+      <button class="secondary" onclick="markEnd()">END <span id="endTxt">--</span></button>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" onclick="toggleLoop()">LOOP <span id="loopState">OFF</span></button>
+      <select id="speed" onchange="setSpeed()">
+        <option value="0.5">0.5×</option>
+        <option value="0.75">0.75×</option>
+        <option value="1" selected>1.0×</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">SECTION</div>
+    <input id="sectionName" placeholder="例：1サビ / ラスサビ" value="1サビ">
+    <div class="status">試作版では歌詞範囲はまだ保存せず、EDITOR操作だけ確認します。</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">PART</div>
+    <div class="row">
+      <select id="member">
+        <option>SOTA</option><option>SHUNTO</option><option>MANATO</option>
+        <option>RYUHEI</option><option>JUNON</option><option>LEO</option>
+      </select>
+      <select id="partType">
+        <option>MAIN</option><option selected>HARMONY</option>
+      </select>
+    </div>
+    <button class="cyan" style="margin-top:8px;width:100%" onclick="createPart()">CREATE PART</button>
+    <div id="partArea"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">PIANO ROLL</div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="secondary" onclick="playAll()">▶ ALL</button>
+      <button class="secondary" onclick="stopSynth()">■ STOP</button>
+    </div>
+    <div id="roll" class="roll"></div>
+    <div class="axis">0 sec →</div>
+  </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let ytReady = false;
+let loopEnabled = false;
+let sectionStart = null;
+let sectionEnd = null;
+let timeTimer = null;
+
+let parts = [];
+let activePartId = null;
+let tapping = false;
+let tapTimes = [];
+let tapBase = 0;
+let audioCtx = null;
+
+function onYouTubeIframeAPIReady(){
+  player = new YT.Player('player', {
+    height:'100%', width:'100%', videoId:'',
+    playerVars:{playsinline:1, rel:0},
+    events:{onReady:()=>{ ytReady = true; startClock(); }}
+  });
+}
+
+function extractVideoId(url){
+  try{
+    const u = new URL(url.trim());
+    if(u.hostname.includes('youtu.be')) return u.pathname.replace('/','').split('?')[0];
+    if(u.searchParams.get('v')) return u.searchParams.get('v');
+    const m = u.pathname.match(/\/embed\/([^/?]+)/);
+    return m ? m[1] : '';
+  }catch(e){ return url.trim(); }
+}
+
+function loadVideo(){
+  if(!ytReady) return alert('YouTube player is not ready yet.');
+  const id = extractVideoId(document.getElementById('ytUrl').value);
+  if(!id) return alert('YouTube URLを確認してね');
+  player.loadVideoById(id);
+}
+function loadDemo(){
+  document.getElementById('ytUrl').value='https://www.youtube.com/watch?v=M7lc1UVf-VE';
+  loadVideo();
+}
+function togglePlay(){
+  if(!ytReady) return;
+  const st = player.getPlayerState();
+  st === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+}
+function seekRelative(sec){
+  if(!ytReady) return;
+  player.seekTo(Math.max(0, player.getCurrentTime()+sec), true);
+}
+function markStart(){
+  if(!ytReady) return;
+  sectionStart = player.getCurrentTime();
+  document.getElementById('startTxt').textContent = formatTime(sectionStart);
+}
+function markEnd(){
+  if(!ytReady) return;
+  sectionEnd = player.getCurrentTime();
+  document.getElementById('endTxt').textContent = formatTime(sectionEnd);
+}
+function toggleLoop(){
+  loopEnabled = !loopEnabled;
+  document.getElementById('loopState').textContent = loopEnabled ? 'ON' : 'OFF';
+}
+function setSpeed(){
+  if(!ytReady) return;
+  const v = Number(document.getElementById('speed').value);
+  try{ player.setPlaybackRate(v); }catch(e){}
+}
+function startClock(){
+  clearInterval(timeTimer);
+  timeTimer = setInterval(()=>{
+    if(!ytReady) return;
+    const t = player.getCurrentTime ? player.getCurrentTime() : 0;
+    document.getElementById('currentTime').textContent = formatTime(t);
+    if(loopEnabled && sectionStart != null && sectionEnd != null && t >= sectionEnd){
+      player.seekTo(sectionStart, true);
+      player.playVideo();
+    }
+  },100);
+}
+function formatTime(sec){
+  sec = Math.max(0, Number(sec)||0);
+  const m = Math.floor(sec/60);
+  const s = sec - m*60;
+  return String(m).padStart(2,'0') + ':' + s.toFixed(2).padStart(5,'0');
+}
+
+function createPart(){
+  const id = 'P' + Date.now();
+  const p = {
+    id,
+    member:document.getElementById('member').value,
+    type:document.getElementById('partType').value,
+    notes:[]
+  };
+  parts.push(p);
+  activePartId = id;
+  renderParts();
+  renderRoll();
+}
+function getActivePart(){ return parts.find(p=>p.id===activePartId); }
+
+function renderParts(){
+  const area = document.getElementById('partArea');
+  area.innerHTML = parts.map(p=>`
+    <div class="part-card">
+      <div class="part-head">
+        <div><b>${p.member}</b> <span class="pill">${p.type}</span></div>
+        <button class="secondary" onclick="selectPart('${p.id}')">${p.id===activePartId?'EDITING':'EDIT'}</button>
+      </div>
+      ${p.id===activePartId ? editorHtml(p) : `<div class="small" style="margin-top:6px">${p.notes.length} notes</div>`}
+    </div>
+  `).join('');
+}
+function editorHtml(p){
+  const ns = p.notes.map((n,i)=>`
+    <div class="note ${n.pitch==null?'active':''}" onclick="selectNote('${p.id}',${i})">
+      <b>${n.pitch || '--'}</b><br><span class="small">${n.start.toFixed(2)}-${n.end.toFixed(2)}</span>
+    </div>`).join('');
+  return `
+    <div id="tapZone" class="tap-zone ${tapping?'active':''}" onclick="tapRhythm()">
+      <b>${tapping?'TAP NOW':'START RHYTHM TAP'}</b>
+      <div class="small">${tapping?'音が変わるたびにタップ':'YouTubeを再生してから開始'}</div>
+    </div>
+    ${tapping?'<button class="secondary" style="width:100%;margin-top:8px" onclick="finishTap(event)">FINISH TAP</button>':''}
+    <div class="notes">${ns}</div>
+    ${p.notes.length?keyboardHtml():''}
+  `;
+}
+function keyboardHtml(){
+  const keys=['C5','B4','A#4','A4','G#4','G4','F#4','F4','E4','D#4','D4','C#4','C4'];
+  return `
+    <div class="section-title" style="margin-top:12px">PITCH</div>
+    <div class="keyboard">${keys.map(k=>`<button class="key" onclick="assignPitch('${k}')">${k}</button>`).join('')}</div>
+  `;
+}
+function selectPart(id){ activePartId=id; renderParts(); }
+function tapRhythm(){
+  const p = getActivePart();
+  if(!p) return;
+  if(!tapping){
+    tapping=true;
+    tapTimes=[];
+    tapBase = sectionStart != null ? sectionStart : (ytReady ? player.getCurrentTime() : 0);
+    tapTimes.push(0);
+  }else{
+    const now = ytReady ? player.getCurrentTime() : tapBase;
+    tapTimes.push(Math.max(0, now - tapBase));
+  }
+  renderParts();
+}
+function finishTap(ev){
+  if(ev) ev.stopPropagation();
+  const p = getActivePart();
+  if(!p || !tapping) return;
+  const last = tapTimes.length ? tapTimes[tapTimes.length - 1] : 0;
+  const now = ytReady ? player.getCurrentTime() : tapBase + last + .5;
+  const end = Math.max(last + 0.1, now-tapBase);
+  const points = [...tapTimes, end].filter((v,i,a)=>i===0 || v>a[i-1]+0.02);
+  p.notes = [];
+  for(let i=0;i<points.length-1;i++){
+    p.notes.push({start:points[i],end:points[i+1],pitch:null,midi:null});
+  }
+  tapping=false;
+  renderParts();
+  renderRoll();
+}
+function selectNote(partId, idx){
+  activePartId=partId;
+  const p=getActivePart();
+  if(!p) return;
+  p.notes.forEach(n=>n.selected=false);
+  if(p.notes[idx]) p.notes[idx].selected=true;
+  renderParts();
+}
+function assignPitch(name){
+  const p=getActivePart();
+  if(!p || !p.notes.length) return;
+  let idx=p.notes.findIndex(n=>n.selected);
+  if(idx<0) idx=p.notes.findIndex(n=>!n.pitch);
+  if(idx<0) idx=p.notes.length-1;
+  p.notes.forEach(n=>n.selected=false);
+  p.notes[idx].pitch=name;
+  p.notes[idx].midi=pitchToMidi(name);
+  if(idx+1<p.notes.length) p.notes[idx+1].selected=true;
+  playTone(p.notes[idx].midi,.28);
+  renderParts();
+  renderRoll();
+}
+function pitchToMidi(name){
+  const m=name.match(/^([A-G])(#?)(-?\d)$/);
+  if(!m) return 60;
+  const semis={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  return (Number(m[3])+1)*12 + semis[m[1]] + (m[2] ? 1 : 0);
+}
+function midiFreq(m){ return 440*Math.pow(2,(m-69)/12); }
+function ensureAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+function playTone(midi,dur=.4,when=0){
+  if(midi==null) return;
+  ensureAudio();
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  osc.type='sine';
+  osc.frequency.value=midiFreq(midi);
+  gain.gain.setValueAtTime(0.0001,audioCtx.currentTime+when);
+  gain.gain.exponentialRampToValueAtTime(0.18,audioCtx.currentTime+when+0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+when+dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime+when);
+  osc.stop(audioCtx.currentTime+when+dur+.03);
+}
+function playAll(){
+  stopSynth();
+  ensureAudio();
+  parts.forEach(p=>p.notes.forEach(n=>{
+    if(n.midi!=null) playTone(n.midi,Math.max(.05,n.end-n.start),n.start);
+  }));
+}
+function stopSynth(){
+  if(audioCtx){ audioCtx.close(); audioCtx=null; }
+}
+function renderRoll(){
+  const roll=document.getElementById('roll');
+  const allNotes=parts.flatMap(p=>p.notes.map(n=>({...n,member:p.member,type:p.type}))).filter(n=>n.midi!=null);
+  if(!allNotes.length){ roll.innerHTML='<div class="small" style="padding:14px">音程を入れるとここに表示されます。</div>'; return; }
+  const minM=Math.min(...allNotes.map(n=>n.midi))-1;
+  const maxM=Math.max(...allNotes.map(n=>n.midi))+1;
+  const maxT=Math.max(2,...allNotes.map(n=>n.end));
+  const h=240, w=Math.max(640,maxT*120);
+  roll.style.minWidth='100%';
+  roll.innerHTML=`<div style="position:relative;width:${w}px;height:${h}px">`+
+    allNotes.map(n=>{
+      const x=n.start/maxT*w;
+      const width=Math.max(24,(n.end-n.start)/maxT*w);
+      const y=(maxM-n.midi)/(maxM-minM)*210+10;
+      return `<div class="bar" style="left:${x}px;top:${y}px;width:${width}px">${n.member} ${n.pitch}</div>`;
+    }).join('')+
+    `</div>`;
+}
+renderRoll();
+</script>
+</body>
+</html>

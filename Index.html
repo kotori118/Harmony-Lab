@@ -128,7 +128,7 @@
     </div>
 
     <div class="row" style="margin-top:8px">
-      <button class="secondary" onclick="toggleLoop()">区間リピート <span id="loopState">OFF</span></button>
+      <button class="secondary" onclick="toggleLoop()">区間リピート <span id="loopState">切</span></button>
       <select id="speed" onchange="setSpeed()">
         <option value="0.5">0.5×</option>
         <option value="0.75">0.75×</option>
@@ -294,10 +294,7 @@ function markEnd(){
   sectionEnd = player.getCurrentTime();
   document.getElementById('endTxt').textContent = formatTime(sectionEnd);
 }
-function toggleLoop(){
-  loopEnabled = !loopEnabled;
-  document.getElementById('loopState').textContent = loopEnabled ? 'ON' : 'OFF';
-}
+
 function setSpeed(){
   if(!ytReady) return;
   const v = Number(document.getElementById('speed').value);
@@ -322,108 +319,16 @@ function formatTime(sec){
   return String(m).padStart(2,'0') + ':' + s.toFixed(2).padStart(5,'0');
 }
 
-function createPart(){
-  const id = 'P' + Date.now();
-  const p = {
-    id,
-    member:document.getElementById('member').value,
-    type:document.getElementById('partType').value,
-    notes:[]
-  };
-  parts.push(p);
-  activePartId = id;
-  renderParts();
-  renderRoll();
-}
-function getActivePart(){ return parts.find(p=>p.id===activePartId); }
 
-function renderParts(){
-  const area = document.getElementById('partArea');
-  area.innerHTML = parts.map(p=>`
-    <div class="part-card">
-      <div class="part-head">
-        <div><b>${p.member}</b> <span class="pill">${p.type}</span></div>
-        <button class="secondary" onclick="selectPart('${p.id}')">${p.id===activePartId?'EDITING':'EDIT'}</button>
-      </div>
-      ${p.id===activePartId ? editorHtml(p) : `<div class="small" style="margin-top:6px">${p.notes.length} notes</div>`}
-    </div>
-  `).join('');
-}
-function editorHtml(p){
-  const ns = p.notes.map((n,i)=>`
-    <div class="note ${n.pitch==null?'active':''}" onclick="selectNote('${p.id}',${i})">
-      <b>${n.pitch || '--'}</b><br><span class="small">${n.start.toFixed(2)}-${n.end.toFixed(2)}</span>
-    </div>`).join('');
-  return `
-    <div id="tapZone" class="tap-zone ${tapping?'active':''}" onclick="tapRhythm()">
-      <b>${tapping?'TAP NOW':'START RHYTHM TAP'}</b>
-      <div class="small">${tapping?'音が変わるたびにタップ':'YouTubeを再生してから開始'}</div>
-    </div>
-    ${tapping?'<button class="secondary" style="width:100%;margin-top:8px" onclick="finishTap(event)">FINISH TAP</button>':''}
-    <div class="notes">${ns}</div>
-    ${p.notes.length?keyboardHtml():''}
-  `;
-}
-function keyboardHtml(){
-  const keys=['C5','B4','A#4','A4','G#4','G4','F#4','F4','E4','D#4','D4','C#4','C4'];
-  return `
-    <div class="section-title" style="margin-top:12px">PITCH</div>
-    <div class="keyboard">${keys.map(k=>`<button class="key" onclick="assignPitch('${k}')">${k}</button>`).join('')}</div>
-  `;
-}
-function selectPart(id){ activePartId=id; renderParts(); }
-function tapRhythm(){
-  const p = getActivePart();
-  if(!p) return;
-  if(!tapping){
-    tapping=true;
-    tapTimes=[];
-    tapBase = sectionStart != null ? sectionStart : (ytReady ? player.getCurrentTime() : 0);
-    tapTimes.push(0);
-  }else{
-    const now = ytReady ? player.getCurrentTime() : tapBase;
-    tapTimes.push(Math.max(0, now - tapBase));
-  }
-  renderParts();
-}
-function finishTap(ev){
-  if(ev) ev.stopPropagation();
-  const p = getActivePart();
-  if(!p || !tapping) return;
-  const last = tapTimes.length ? tapTimes[tapTimes.length - 1] : 0;
-  const now = ytReady ? player.getCurrentTime() : tapBase + last + .5;
-  const end = Math.max(last + 0.1, now-tapBase);
-  const points = [...tapTimes, end].filter((v,i,a)=>i===0 || v>a[i-1]+0.02);
-  p.notes = [];
-  for(let i=0;i<points.length-1;i++){
-    p.notes.push({start:points[i],end:points[i+1],pitch:null,midi:null});
-  }
-  tapping=false;
-  renderParts();
-  renderRoll();
-}
-function selectNote(partId, idx){
-  activePartId=partId;
-  const p=getActivePart();
-  if(!p) return;
-  p.notes.forEach(n=>n.selected=false);
-  if(p.notes[idx]) p.notes[idx].selected=true;
-  renderParts();
-}
-function assignPitch(name){
-  const p=getActivePart();
-  if(!p || !p.notes.length) return;
-  let idx=p.notes.findIndex(n=>n.selected);
-  if(idx<0) idx=p.notes.findIndex(n=>!n.pitch);
-  if(idx<0) idx=p.notes.length-1;
-  p.notes.forEach(n=>n.selected=false);
-  p.notes[idx].pitch=name;
-  p.notes[idx].midi=pitchToMidi(name);
-  if(idx+1<p.notes.length) p.notes[idx+1].selected=true;
-  playTone(p.notes[idx].midi,.28);
-  renderParts();
-  renderRoll();
-}
+
+
+
+
+
+
+
+
+
 function pitchToMidi(name){
   const m=name.match(/^([A-G])(#?)(-?\d)$/);
   if(!m) return 60;
@@ -446,34 +351,9 @@ function playTone(midi,dur=.4,when=0){
   osc.start(audioCtx.currentTime+when);
   osc.stop(audioCtx.currentTime+when+dur+.03);
 }
-function playAll(){
-  stopSynth();
-  ensureAudio();
-  parts.forEach(p=>p.notes.forEach(n=>{
-    if(n.midi!=null) playTone(n.midi,Math.max(.05,n.end-n.start),n.start);
-  }));
-}
-function stopSynth(){
-  if(audioCtx){ audioCtx.close(); audioCtx=null; }
-}
-function renderRoll(){
-  const roll=document.getElementById('roll');
-  const allNotes=parts.flatMap(p=>p.notes.map(n=>({...n,member:p.member,type:p.type}))).filter(n=>n.midi!=null);
-  if(!allNotes.length){ roll.innerHTML='<div class="small" style="padding:14px">音程を入れるとここに表示されます。</div>'; return; }
-  const minM=Math.min(...allNotes.map(n=>n.midi))-1;
-  const maxM=Math.max(...allNotes.map(n=>n.midi))+1;
-  const maxT=Math.max(2,...allNotes.map(n=>n.end));
-  const h=240, w=Math.max(640,maxT*120);
-  roll.style.minWidth='100%';
-  roll.innerHTML=`<div style="position:relative;width:${w}px;height:${h}px">`+
-    allNotes.map(n=>{
-      const x=n.start/maxT*w;
-      const width=Math.max(24,(n.end-n.start)/maxT*w);
-      const y=(maxM-n.midi)/(maxM-minM)*210+10;
-      return `<div class="bar" style="left:${x}px;top:${y}px;width:${width}px">${n.member} ${n.pitch}</div>`;
-    }).join('')+
-    `</div>`;
-}
+
+
+
 renderRoll();
 
 // ===== Harmony Lab prototype v2 =====

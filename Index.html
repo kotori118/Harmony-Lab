@@ -62,42 +62,73 @@
     .axis{font-size:10px;color:var(--muted);margin-top:6px}
     .status{padding:9px 10px;border-radius:10px;background:#f7f7f7;font-size:12px;margin-top:8px}
     .hidden{display:none}
+  
+    .lab-bpm{display:flex;gap:8px;align-items:center}
+    .lab-bpm input{max-width:100px;text-align:center;font-weight:900}
+    .lab-bpm button{flex:1}
+    .lab-check{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:13px;font-weight:700}
+    .lab-check input{width:auto;accent-color:var(--cyan)}
+    .lab-section-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;padding-bottom:3px}
+    .lab-section-tabs button{white-space:nowrap;background:#fff;color:#111;border:1px solid var(--line)}
+    .lab-section-tabs button.active{background:#111;color:#fff}
+    .lab-roll{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+    .lab-axis,.lab-lane{display:grid;grid-template-columns:104px 1fr;min-height:56px;border-bottom:1px solid var(--line)}
+    .lab-axis{min-height:38px}
+    .lab-label{padding:8px;border-right:1px solid var(--line);background:#fff;z-index:3}
+    .lab-label b{font-size:12px}
+    .lab-window{position:relative;overflow:hidden;touch-action:none}
+    .lab-inner{position:absolute;left:50%;top:0;bottom:0;will-change:transform}
+    .lab-grid{position:absolute;top:0;bottom:0;width:1px;background:#edf0f2;pointer-events:none}
+    .lab-grid.measure{width:2px;background:#cfd4dc}
+    .lab-measure{position:absolute;top:5px;font-size:10px;font-weight:800;white-space:nowrap}
+    .lab-playhead{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#111;z-index:6;pointer-events:none}
+    .lab-note{position:absolute;top:11px;height:34px;min-width:12px;border-radius:8px;background:var(--cyan);color:#00151c;font-size:10px;font-weight:900;padding:9px 10px;white-space:nowrap;touch-action:none;user-select:none;-webkit-user-select:none;overflow:visible}
+    .lab-note.active{outline:3px solid #111}
+    .lab-note.multi{box-shadow:0 0 0 3px rgba(0,194,255,.3)}
+    .lab-handle{position:absolute;top:0;width:12px;height:100%;background:rgba(0,0,0,.12)}
+    .lab-handle.left{left:0;border-radius:8px 0 0 8px}.lab-handle.right{right:0;border-radius:0 8px 8px 0}
+    .lab-count{text-align:center;font-size:36px;font-weight:900;padding:8px}
+    .lab-tap{width:100%;min-height:92px;background:#111;color:#fff;font-size:19px;touch-action:none;margin-top:8px}
+    .lab-keyboard{position:relative;height:122px;display:flex;margin-top:10px;overflow-x:auto}
+    .lab-white{position:relative;flex:0 0 48px;height:118px;background:#fff!important;color:#111!important;border:1px solid #cfd4dc!important;border-radius:0 0 8px 8px!important;padding:80px 2px 3px!important;font-size:11px!important;z-index:1}
+    .lab-black{position:absolute;top:0;width:30px;height:70px;background:#111!important;color:#fff!important;border-radius:0 0 7px 7px!important;padding:44px 1px 3px!important;font-size:9px!important;z-index:2}
+
   </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand">HARMONY LAB</div>
-    <div class="badge">PROTOTYPE</div>
+    <div class="brand">ハモリラボ</div>
+    <div class="badge">試作版</div>
   </div>
 
   <div class="card">
-    <div class="section-title">SOURCE</div>
+    <div class="section-title">参考音源（YouTube）</div>
     <input id="ytUrl" placeholder="YouTube URLを貼り付け">
     <div class="row" style="margin-top:8px">
-      <button class="cyan" onclick="loadVideo()">LOAD YOUTUBE</button>
-      <button class="secondary" onclick="loadDemo()">DEMO</button>
+      <button class="cyan" onclick="loadVideo()">YouTubeを読み込む</button>
+      <button class="secondary" onclick="loadDemo()">動作確認用動画</button>
     </div>
     <div class="player-wrap" style="margin-top:12px"><div id="player"></div></div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-      <div class="small">CURRENT</div>
+      <div class="small">再生位置</div>
       <div id="currentTime" class="time">00:00.00</div>
     </div>
 
     <div class="controls">
-      <button class="secondary" onclick="seekRelative(-5)">-5s</button>
-      <button onclick="togglePlay()">▶ / ⏸</button>
-      <button class="secondary" onclick="seekRelative(5)">+5s</button>
+      <button class="secondary" onclick="seekRelative(-5)">5秒戻す</button>
+      <button onclick="togglePlay()">再生 / 一時停止</button>
+      <button class="secondary" onclick="seekRelative(5)">5秒進める</button>
     </div>
 
     <div class="range-grid">
-      <button class="secondary" onclick="markStart()">START <span id="startTxt">--</span></button>
-      <button class="secondary" onclick="markEnd()">END <span id="endTxt">--</span></button>
+      <button class="secondary" onclick="markStart()">開始位置 <span id="startTxt">--</span></button>
+      <button class="secondary" onclick="markEnd()">終了位置 <span id="endTxt">--</span></button>
     </div>
 
     <div class="row" style="margin-top:8px">
-      <button class="secondary" onclick="toggleLoop()">LOOP <span id="loopState">OFF</span></button>
+      <button class="secondary" onclick="toggleLoop()">区間リピート <span id="loopState">OFF</span></button>
       <select id="speed" onchange="setSpeed()">
         <option value="0.5">0.5×</option>
         <option value="0.75">0.75×</option>
@@ -107,34 +138,96 @@
   </div>
 
   <div class="card">
-    <div class="section-title">SECTION</div>
-    <input id="sectionName" placeholder="例：1サビ / ラスサビ" value="1サビ">
-    <div class="status">試作版では歌詞範囲はまだ保存せず、EDITOR操作だけ確認します。</div>
+    <div class="section-title">曲とテンポ</div>
+    <div class="lab-bpm">
+      <button class="secondary" onclick="changeLabBpm(-1)">−1</button>
+      <input id="labBpm" type="number" min="30" max="300" value="120" inputmode="numeric" onchange="setLabBpm(this.value)">
+      <button class="secondary" onclick="changeLabBpm(1)">＋1</button>
+      <button id="labMetroBtn" class="cyan" onclick="toggleLabMetronome()">メトロノーム開始</button>
+    </div>
+    <label class="lab-check"><input id="labPlayMetro" type="checkbox" checked> 譜面再生・収録中もメトロノームを鳴らす</label>
+    <div class="small" style="margin-top:6px">入力タイミングはBPMへ吸着せず、実際に押した位置をそのまま記録します。</div>
   </div>
 
   <div class="card">
-    <div class="section-title">PART</div>
+    <div class="section-title">区間</div>
+    <div id="labSectionTabs" class="lab-section-tabs"></div>
+    <div class="row">
+      <input id="sectionName" placeholder="例：サビ1 / ラスサビ" value="サビ1">
+      <input id="labBars" type="number" min="1" max="64" value="8" inputmode="numeric" aria-label="表示小節数">
+    </div>
+    <div class="small" style="margin-top:6px">区間ごとに独立した譜面として編集します。右側は表示する小節数です。</div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" onclick="addLabSection()">新しい区間を追加</button>
+      <button class="secondary" onclick="applyLabSection()">区間名・小節数を反映</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">パート</div>
     <div class="row">
       <select id="member">
         <option>SOTA</option><option>SHUNTO</option><option>MANATO</option>
         <option>RYUHEI</option><option>JUNON</option><option>LEO</option>
       </select>
       <select id="partType">
-        <option>MAIN</option><option selected>HARMONY</option>
+        <option value="MAIN">主旋律</option><option value="HARMONY" selected>ハモリ</option>
       </select>
     </div>
-    <button class="cyan" style="margin-top:8px;width:100%" onclick="createPart()">CREATE PART</button>
+    <button class="cyan" style="margin-top:8px;width:100%" onclick="createPart()">パートを追加</button>
     <div id="partArea"></div>
   </div>
 
   <div class="card">
-    <div class="section-title">PIANO ROLL</div>
-    <div class="row" style="margin-bottom:10px">
-      <button class="secondary" onclick="playAll()">▶ ALL</button>
-      <button class="secondary" onclick="stopSynth()">■ STOP</button>
+    <div class="section-title">譜面</div>
+    <div class="row" style="margin-bottom:8px">
+      <button id="labPlayBtn" onclick="toggleLabPlayback()">譜面を再生</button>
+      <button class="secondary" onclick="stopLabPlayback(true)">停止</button>
+      <button class="secondary" onclick="setLabPlayhead(0)">先頭へ</button>
     </div>
-    <div id="roll" class="roll"></div>
-    <div class="axis">0 sec →</div>
+    <div class="status">現在位置 <b id="labTime">00:00.00</b> ／ <span id="labMeasure">1小節目</span></div>
+    <input id="labSeek" type="range" min="0" max="16" value="0" step="0.01" oninput="setLabPlayhead(Number(this.value))" style="margin:10px 0 8px">
+    <div class="small">再生ラインは中央に固定し、BPMに合わせて譜面が右から左へ流れます。空白部分をタップすると再生位置を移動できます。</div>
+    <div id="roll" class="lab-roll" style="margin-top:10px"></div>
+    <div id="labNoteTools" class="hidden">
+      <div class="row" style="margin-top:10px">
+        <button class="secondary" onclick="toggleLabMultiSelect()"><span id="labMultiText">複数選択を開始</span></button>
+        <button class="secondary" onclick="splitLabNote()">再生ラインで分割</button>
+        <button class="secondary" onclick="deleteLabNote()">選択した音を削除</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">リズム収録</div>
+    <div class="small">YouTubeは参考音源として独立しています。先に好きな位置から再生して、必要なタイミングで収録を始められます。</div>
+    <div class="row" style="margin-top:8px">
+      <select id="labRecordPart"></select>
+      <button class="secondary" onclick="useLabRecordStart()">現在位置を収録開始位置にする</button>
+    </div>
+    <div class="status">収録開始位置：<b id="labRecordStart">00:00.00</b> ／ 開始前に4拍カウント</div>
+    <button id="labRecordBtn" class="cyan" style="width:100%;margin-top:8px" onclick="beginLabCountIn()">収録開始</button>
+    <div id="labCountdown" class="lab-count hidden">4</div>
+    <div id="labRecordPanel" class="hidden" style="margin-top:8px">
+      <div id="labRecordStatus" class="status">収録中</div>
+      <button id="labTap" class="lab-tap">ここをリズムに合わせて押す</button>
+      <div class="small" style="text-align:center;margin-top:6px">短く押す＝短い音 ／ 長押し＝押している長さをそのまま記録</div>
+      <button class="secondary" style="width:100%;margin-top:8px" onclick="finishLabRecording()">収録を終了</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">リズムをコピー</div>
+    <div class="small">音程はコピーせず、開始位置と長さだけを複製します。</div>
+    <div class="row" style="margin-top:8px">
+      <select id="labCopyFrom"></select>
+      <select id="labCopyTo"></select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" onclick="copyLabRhythm(false)">パート全体をコピー</button>
+      <button class="secondary" onclick="copyLabRhythm(true)">複数選択した部分だけコピー</button>
+    </div>
+    <div id="labCopyStatus" class="status">部分コピーは譜面で「複数選択」を開始して、必要な音を選んでから使います。</div>
   </div>
 </div>
 
@@ -173,7 +266,7 @@ function extractVideoId(url){
 }
 
 function loadVideo(){
-  if(!ytReady) return alert('YouTube player is not ready yet.');
+  if(!ytReady) return alert('YouTubeプレーヤーを準備中です。少し待ってからもう一度押してください。');
   const id = extractVideoId(document.getElementById('ytUrl').value);
   if(!id) return alert('YouTube URLを確認してね');
   player.loadVideoById(id);
@@ -382,6 +475,186 @@ function renderRoll(){
     `</div>`;
 }
 renderRoll();
+
+// ===== Harmony Lab prototype v2 =====
+let labBpmValue = 120;
+let labSections = [{id:'LS1', name:'サビ1', bars:8, parts:parts}];
+let labSectionId = 'LS1';
+let labPlayhead = 0;
+let labRecordStartValue = 0;
+let labMode = 'idle';
+let labStartedAt = 0;
+let labFrom = 0;
+let labRaf = null;
+let labFired = new Set();
+let labLastBeat = -1;
+let labMetroRunning = false;
+let labMetroTimer = null;
+let labPress = null;
+let labDrag = null;
+let labMulti = false;
+const LAB_BEATS = 4;
+const LAB_PX_BEAT = 72;
+
+function labSecPerBeat(){ return 60/labBpmValue; }
+function labPxPerSec(){ return LAB_PX_BEAT/labSecPerBeat(); }
+function labSection(){ return labSections.find(x=>x.id===labSectionId); }
+function labDuration(){
+  const sec=labSection();
+  const base=(sec?.bars||8)*LAB_BEATS*labSecPerBeat();
+  const maxNote=Math.max(0,...parts.flatMap(p=>p.notes.map(n=>n.end||0)));
+  return Math.max(base,maxNote+LAB_BEATS*labSecPerBeat());
+}
+function labUid(prefix){ return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function labType(t){ return t==='MAIN'?'主旋律':'ハモリ'; }
+function labPartName(p){ return p.member+' '+labType(p.type); }
+function labFmt(sec){ sec=Math.max(0,Number(sec)||0); const m=Math.floor(sec/60),v=sec-m*60; return String(m).padStart(2,'0')+':'+v.toFixed(2).padStart(5,'0'); }
+function labClamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
+function labEnsureIds(){ parts.forEach(p=>{ if(p.playEnabled==null)p.playEnabled=true;if(p.visible==null)p.visible=true;p.notes.forEach(n=>{if(!n.id)n.id=labUid('N');if(n.copySelected==null)n.copySelected=false;}); }); }
+
+function toggleLoop(){ loopEnabled=!loopEnabled; document.getElementById('loopState').textContent=loopEnabled?'入':'切'; }
+
+function setLabBpm(v){ labBpmValue=labClamp(Number(v)||120,30,300); document.getElementById('labBpm').value=labBpmValue; renderRoll(); }
+function changeLabBpm(d){ setLabBpm(labBpmValue+d); }
+function labClick(accent=false){
+  ensureAudio();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain(),now=audioCtx.currentTime;
+  o.type='square';o.frequency.value=accent?1250:900;g.gain.setValueAtTime(.15,now);g.gain.exponentialRampToValueAtTime(.0001,now+.055);
+  o.connect(g).connect(audioCtx.destination);o.start(now);o.stop(now+.06);
+}
+function toggleLabMetronome(){
+  if(labMetroRunning){ clearTimeout(labMetroTimer);labMetroRunning=false;document.getElementById('labMetroBtn').textContent='メトロノーム開始';return; }
+  ensureAudio();labMetroRunning=true;document.getElementById('labMetroBtn').textContent='メトロノーム停止';let beat=0;
+  const tick=()=>{if(!labMetroRunning)return;labClick(beat%4===0);beat++;labMetroTimer=setTimeout(tick,labSecPerBeat()*1000)};tick();
+}
+
+function renderLabSections(){
+  const box=document.getElementById('labSectionTabs'); if(!box)return;
+  box.innerHTML=labSections.map(x=>'<button class="'+(x.id===labSectionId?'active':'')+'" onclick="switchLabSection(\''+x.id+'\')">'+x.name+'</button>').join('');
+  const sec=labSection(); if(sec){document.getElementById('sectionName').value=sec.name;document.getElementById('labBars').value=sec.bars;}
+}
+function addLabSection(){
+  const id=labUid('LS'),name=(document.getElementById('sectionName').value||'新しい区間').trim();
+  const sec={id,name:name==='サビ1'?'新しい区間':name,bars:8,parts:[]};labSections.push(sec);switchLabSection(id);
+}
+function switchLabSection(id){
+  stopLabPlayback(false); const sec=labSections.find(x=>x.id===id); if(!sec)return;
+  labSectionId=id;parts=sec.parts;activePartId=null;labPlayhead=0;labRecordStartValue=0;labMulti=false;renderLabAll();
+}
+function applyLabSection(){
+  const sec=labSection();if(!sec)return;sec.name=(document.getElementById('sectionName').value||sec.name).trim();sec.bars=labClamp(Number(document.getElementById('labBars').value)||8,1,64);renderLabAll();
+}
+
+function createPart(){
+  const id='P'+Date.now()+Math.random().toString(36).slice(2,5);
+  const p={id,member:document.getElementById('member').value,type:document.getElementById('partType').value,notes:[],playEnabled:true,visible:true};
+  parts.push(p);activePartId=id;renderLabAll();
+}
+function getActivePart(){ return parts.find(p=>p.id===activePartId); }
+function renderParts(){
+  labEnsureIds();
+  const area=document.getElementById('partArea');
+  area.innerHTML=parts.length?parts.map(p=>'<div class="part-card"><div class="part-head"><div><b>'+p.member+'</b> <span class="pill">'+labType(p.type)+'</span></div><button class="secondary" onclick="selectPart(\''+p.id+'\')">'+(p.id===activePartId?'編集中':'編集する')+'</button></div><div class="row" style="margin-top:7px"><button class="secondary" onclick="toggleLabPart(\''+p.id+'\',\'visible\')">表示：'+(p.visible?'入':'切')+'</button><button class="secondary" onclick="toggleLabPart(\''+p.id+'\',\'playEnabled\')">再生：'+(p.playEnabled?'入':'切')+'</button></div>'+(p.id===activePartId?editorHtml(p):'<div class="small" style="margin-top:6px">'+p.notes.length+'音</div>')+'</div>').join(''):'<div class="status">まだパートがありません。</div>';
+}
+function toggleLabPart(id,key){const p=parts.find(x=>x.id===id);if(!p)return;p[key]=!p[key];renderLabAll();}
+function editorHtml(p){
+  const notes=p.notes.map((n,i)=>'<div class="note '+(n.selected?'active':'')+(n.copySelected?' active':'')+'" onclick="selectNote(\''+p.id+'\','+i+')"><b>'+(n.pitch||'音程未設定')+'</b><br><span class="small">'+n.start.toFixed(2)+'-'+n.end.toFixed(2)+'</span></div>').join('');
+  return '<div class="notes">'+notes+'</div>'+(p.notes.length?keyboardHtml():'');
+}
+function keyboardHtml(){
+  const whites=['C4','D4','E4','F4','G4','A4','B4','C5'];
+  const black=[['C#4',33],['D#4',81],['F#4',177],['G#4',225],['A#4',273]];
+  return '<div class="section-title" style="margin-top:12px">音程を設定</div><div class="small">鍵盤を押すと音を確認し、その音程を選択中の音へ登録します。</div><div class="lab-keyboard">'+whites.map(k=>'<button class="lab-white" onclick="assignPitch(\''+k+'\')">'+k+'</button>').join('')+black.map(x=>'<button class="lab-black" style="left:'+x[1]+'px" onclick="assignPitch(\''+x[0]+'\')">'+x[0]+'</button>').join('')+'</div>';
+}
+function selectPart(id){activePartId=id;parts.forEach(p=>p.notes.forEach(n=>n.selected=false));renderLabAll();}
+function selectNote(partId,idx){
+  activePartId=partId;const p=getActivePart();if(!p||!p.notes[idx])return;
+  if(labMulti){p.notes[idx].copySelected=!p.notes[idx].copySelected;}else{parts.forEach(x=>x.notes.forEach(n=>n.selected=false));p.notes[idx].selected=true;}
+  renderLabAll();
+}
+function assignPitch(name){
+  const p=getActivePart();if(!p)return;let n=p.notes.find(x=>x.selected);if(!n)n=p.notes.find(x=>!x.pitch);if(!n)return;
+  n.pitch=name;n.midi=pitchToMidi(name);playTone(n.midi,.28);renderLabAll();
+}
+
+function renderLabSelectors(){
+  const opts=parts.map(p=>'<option value="'+p.id+'">'+labPartName(p)+'</option>').join('');
+  ['labRecordPart','labCopyFrom','labCopyTo'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const prev=el.value;el.innerHTML=opts||'<option value="">パートを先に追加してください</option>';if(parts.some(p=>p.id===prev))el.value=prev;});
+  if(activePartId){const r=document.getElementById('labRecordPart'),f=document.getElementById('labCopyFrom');if(r&&parts.some(p=>p.id===activePartId))r.value=activePartId;if(f&&parts.some(p=>p.id===activePartId))f.value=activePartId;}
+}
+
+function labGrid(totalBeats){
+  let out='';for(let i=0;i<=totalBeats;i++){out+='<div class="lab-grid '+(i%4===0?'measure':'')+'" style="left:'+(i*LAB_PX_BEAT)+'px"></div>';if(i%4===0)out+='<div class="lab-measure" style="left:'+(i*LAB_PX_BEAT+5)+'px">'+(i/4+1)+'小節</div>';}return out;
+}
+function renderRoll(){
+  labEnsureIds();
+  const roll=document.getElementById('roll');if(!roll)return;
+  const visible=parts.filter(p=>p.visible),dur=labDuration(),beats=Math.ceil(dur/labSecPerBeat()),width=Math.max(beats*LAB_PX_BEAT,LAB_PX_BEAT*4),off=labPlayhead*labPxPerSec(),grid=labGrid(beats);
+  const seek=document.getElementById('labSeek');if(seek){seek.max=dur;seek.value=labPlayhead;}
+  if(document.getElementById('labTime'))document.getElementById('labTime').textContent=labFmt(labPlayhead);
+  if(document.getElementById('labMeasure'))document.getElementById('labMeasure').textContent=(Math.floor(labPlayhead/(labSecPerBeat()*4))+1)+'小節目';
+  if(!visible.length){roll.innerHTML='<div class="status" style="margin:10px">表示するパートがありません。</div>';return;}
+  roll.innerHTML='<div class="lab-axis"><div class="lab-label"><b>パート</b></div><div class="lab-window" onclick="labSeekFromLane(event)"><div class="lab-inner" style="width:'+width+'px;transform:translateX('+-off+'px)">'+grid+'</div><div class="lab-playhead"></div></div></div>'+visible.map(p=>'<div class="lab-lane"><div class="lab-label"><b>'+p.member+'</b><div class="small">'+labType(p.type)+'</div></div><div class="lab-window" onclick="labSeekFromLane(event)"><div class="lab-inner" style="width:'+width+'px;transform:translateX('+-off+'px)">'+grid+p.notes.map(n=>labNoteHtml(p,n)).join('')+'</div><div class="lab-playhead"></div></div></div>').join('');
+  document.querySelectorAll('.lab-note').forEach(el=>el.addEventListener('pointerdown',labNoteDown));
+  const tools=document.getElementById('labNoteTools');if(tools)tools.classList.toggle('hidden',!parts.some(p=>p.notes.some(n=>n.selected)));
+}
+function labNoteHtml(p,n){const left=n.start*labPxPerSec(),w=Math.max(12,(n.end-n.start)*labPxPerSec());return '<div class="lab-note '+(n.selected?'active ':'')+(n.copySelected?'multi':'')+'" data-part="'+p.id+'" data-note="'+n.id+'" style="left:'+left+'px;width:'+w+'px"><span class="lab-handle left" data-edge="left"></span>'+(n.pitch||'音程未設定')+'<span class="lab-handle right" data-edge="right"></span></div>';}
+function labSeekFromLane(ev){if(ev.target.closest('.lab-note'))return;const r=ev.currentTarget.getBoundingClientRect(),sec=labPlayhead+(ev.clientX-r.left-r.width/2)/labPxPerSec();setLabPlayhead(sec);}
+function setLabPlayhead(sec){labPlayhead=labClamp(Number(sec)||0,0,labDuration());if(labMode==='playing'){labFrom=labPlayhead;labStartedAt=performance.now();labFired.clear();labLastBeat=-1;}renderRoll();}
+function labNoteDown(ev){
+  ev.stopPropagation();const el=ev.currentTarget,p=parts.find(x=>x.id===el.dataset.part),n=p?.notes.find(x=>x.id===el.dataset.note);if(!p||!n)return;
+  activePartId=p.id;if(labMulti){n.copySelected=!n.copySelected;renderLabAll();return;}
+  parts.forEach(x=>x.notes.forEach(y=>y.selected=false));n.selected=true;
+  const edge=ev.target.dataset.edge||'move';labDrag={el,n,pointerId:ev.pointerId,startX:ev.clientX,start:n.start,end:n.end,edge};el.setPointerCapture(ev.pointerId);el.addEventListener('pointermove',labNoteMove);el.addEventListener('pointerup',labNoteUp,{once:true});el.addEventListener('pointercancel',labNoteUp,{once:true});
+}
+function labNoteMove(ev){const d=labDrag;if(!d||ev.pointerId!==d.pointerId)return;const ds=(ev.clientX-d.startX)/labPxPerSec(),min=.05;if(d.edge==='left')d.n.start=labClamp(d.start+ds,0,d.n.end-min);else if(d.edge==='right')d.n.end=Math.max(d.n.start+min,d.end+ds);else{const len=d.end-d.start,ns=Math.max(0,d.start+ds);d.n.start=ns;d.n.end=ns+len;}d.el.style.left=(d.n.start*labPxPerSec())+'px';d.el.style.width=Math.max(12,(d.n.end-d.n.start)*labPxPerSec())+'px';}
+function labNoteUp(){labDrag=null;renderLabAll();}
+function toggleLabMultiSelect(){labMulti=!labMulti;if(!labMulti)parts.forEach(p=>p.notes.forEach(n=>n.copySelected=false));document.getElementById('labMultiText').textContent=labMulti?'複数選択を終了':'複数選択を開始';renderLabAll();}
+function splitLabNote(){const p=getActivePart(),n=p?.notes.find(x=>x.selected);if(!n)return alert('分割する音を選んでください。');if(labPlayhead<=n.start+.03||labPlayhead>=n.end-.03)return alert('再生ラインを、選択した音の途中へ移動してください。');const i=p.notes.indexOf(n),right={...n,id:labUid('N'),start:labPlayhead,selected:true,copySelected:false};n.end=labPlayhead;n.selected=false;p.notes.splice(i+1,0,right);renderLabAll();}
+function deleteLabNote(){const p=getActivePart();if(!p)return;const n=p.notes.find(x=>x.selected);if(!n)return;p.notes=p.notes.filter(x=>x!==n);renderLabAll();}
+
+function toggleLabPlayback(){if(labMode==='playing'){stopLabPlayback(true);return;}if(labMode!=='idle')return;startLabPlayback('playing');}
+function startLabPlayback(mode){ensureAudio();labMode=mode;labFrom=labPlayhead;labStartedAt=performance.now();labFired.clear();labLastBeat=-1;document.getElementById('labPlayBtn').textContent=mode==='recording'?'収録中':'一時停止';labFrame();}
+function stopLabPlayback(keep=true){if(labRaf)cancelAnimationFrame(labRaf);labRaf=null;if(labMode==='recording'&&labPress)endLabPress();labMode='idle';labFired.clear();labLastBeat=-1;if(!keep)labPlayhead=0;const b=document.getElementById('labPlayBtn');if(b)b.textContent='譜面を再生';renderLabAll();}
+function labFrame(){
+  if(labMode!=='playing'&&labMode!=='recording')return;
+  labPlayhead=labFrom+(performance.now()-labStartedAt)/1000;
+  const beat=Math.floor(labPlayhead/labSecPerBeat());if(document.getElementById('labPlayMetro')?.checked&&beat!==labLastBeat){if(labLastBeat<beat)labClick(beat%4===0);labLastBeat=beat;}
+  parts.filter(p=>p.playEnabled).forEach(p=>p.notes.forEach(n=>{if(n.midi!=null&&n.start>=labFrom&&n.start<=labPlayhead+.025&&!labFired.has(n.id)){labFired.add(n.id);playTone(n.midi,Math.max(.05,n.end-n.start));}}));
+  if(labPlayhead>=labDuration()){labPlayhead=labDuration();if(labMode==='recording')finishLabRecording();else stopLabPlayback(true);return;}
+  const off=labPlayhead*labPxPerSec();document.querySelectorAll('.lab-inner').forEach(el=>el.style.transform='translateX('+-off+'px)');if(document.getElementById('labTime'))document.getElementById('labTime').textContent=labFmt(labPlayhead);if(document.getElementById('labMeasure'))document.getElementById('labMeasure').textContent=(Math.floor(labPlayhead/(labSecPerBeat()*4))+1)+'小節目';if(document.getElementById('labSeek'))document.getElementById('labSeek').value=labPlayhead;if(labMode==='recording')document.getElementById('labRecordStatus').textContent='収録中　'+labFmt(labPlayhead);
+  labRaf=requestAnimationFrame(labFrame);
+}
+
+function useLabRecordStart(){labRecordStartValue=labPlayhead;document.getElementById('labRecordStart').textContent=labFmt(labRecordStartValue);}
+function beginLabCountIn(){
+  const p=parts.find(x=>x.id===document.getElementById('labRecordPart').value);if(!p)return alert('収録するパートを先に追加してください。');if(labMode!=='idle')return;
+  activePartId=p.id;labPlayhead=labRecordStartValue;labMode='counting';if(labMetroRunning)toggleLabMetronome();
+  const cd=document.getElementById('labCountdown');cd.classList.remove('hidden');document.getElementById('labRecordBtn').disabled=true;let beat=4;
+  const step=()=>{if(labMode!=='counting')return;cd.textContent=beat;labClick(beat===4);if(beat===1){setTimeout(()=>{cd.classList.add('hidden');labMode='recording';labPlayhead=labRecordStartValue;document.getElementById('labRecordPanel').classList.remove('hidden');document.getElementById('labRecordBtn').disabled=false;startLabPlayback('recording');},labSecPerBeat()*1000);return;}beat--;setTimeout(step,labSecPerBeat()*1000);};step();
+}
+function beginLabPress(ev){if(labMode!=='recording'||labPress)return;ev.preventDefault();const p=parts.find(x=>x.id===document.getElementById('labRecordPart').value);if(!p)return;labPress={part:p,start:labPlayhead,pointerId:ev.pointerId};ev.currentTarget.setPointerCapture(ev.pointerId);}
+function endLabPress(ev){if(!labPress)return;const r=labPress,end=Math.max(r.start+.05,labPlayhead),n={id:labUid('N'),start:r.start,end,pitch:null,midi:null,selected:true,copySelected:false};parts.forEach(p=>p.notes.forEach(x=>x.selected=false));r.part.notes.push(n);r.part.notes.sort((a,b)=>a.start-b.start);activePartId=r.part.id;labPress=null;renderRoll();}
+function finishLabRecording(){if(labMode!=='recording'&&labMode!=='counting')return;if(labPress)endLabPress();if(labRaf)cancelAnimationFrame(labRaf);labRaf=null;labMode='idle';labFired.clear();labLastBeat=-1;document.getElementById('labRecordPanel').classList.add('hidden');document.getElementById('labCountdown').classList.add('hidden');document.getElementById('labRecordBtn').disabled=false;document.getElementById('labPlayBtn').textContent='譜面を再生';renderLabAll();}
+
+function copyLabRhythm(selectedOnly){
+  const from=parts.find(p=>p.id===document.getElementById('labCopyFrom').value),to=parts.find(p=>p.id===document.getElementById('labCopyTo').value);if(!from||!to)return alert('コピー元とコピー先を選んでください。');if(from===to)return alert('コピー先は別のパートを選んでください。');
+  const src=selectedOnly?from.notes.filter(n=>n.copySelected):from.notes;if(!src.length)return alert(selectedOnly?'コピーする部分が選択されていません。':'コピー元にリズムがありません。');
+  src.forEach(n=>to.notes.push({id:labUid('N'),start:n.start,end:n.end,pitch:null,midi:null,selected:false,copySelected:false}));to.notes.sort((a,b)=>a.start-b.start);document.getElementById('labCopyStatus').textContent=src.length+'個のリズムを「'+labPartName(to)+'」へコピーしました。音程は未設定です。';renderLabAll();
+}
+
+function playAll(){toggleLabPlayback();}
+function stopSynth(){stopLabPlayback(true);}
+
+function renderLabAll(){
+  renderLabSections();renderParts();renderLabSelectors();renderRoll();document.getElementById('labBpm').value=labBpmValue;document.getElementById('labRecordStart').textContent=labFmt(labRecordStartValue);const m=document.getElementById('labMultiText');if(m)m.textContent=labMulti?'複数選択を終了':'複数選択を開始';
+}
+function initHarmonyLab(){
+  renderLabAll();
+  const tap=document.getElementById('labTap');if(tap){tap.addEventListener('pointerdown',beginLabPress);tap.addEventListener('pointerup',endLabPress);tap.addEventListener('pointercancel',endLabPress);}
+}
+initHarmonyLab();
+
 </script>
 </body>
 </html>
